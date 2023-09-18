@@ -1,0 +1,40 @@
+version: '3.8'
+
+
+services:
+  postgres_db:
+    image: postgres:${POSTGRES_SERVER_VERSION}
+    #image: postgres:latest
+    #container_name: postgres-authentication-server
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_EXPOSE_PORT}:${POSTGRES_SERVER_PORT}
+    networks: ['app-network']
+  keycloak:
+    image: bitnami/keycloak:${KEYCLOAK_SERVER_VERSION}
+    #restart: unless-stopped
+    env_file: .env
+    environment:
+      - KEYCLOAK_ADMIN_USER=${KEYCLOAK_ADMIN_USER}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KEYCLOAK_DATABASE_VENDOR=${KEYCLOAK_DB_VENDOR}
+      - KEYCLOAK_DATABASE_HOST=${KEYCLOAK_DB_HOST}
+      - KEYCLOAK_DATABASE_PORT=${KEYCLOAK_DB_PORT}
+      - KEYCLOAK_DATABASE_NAME=${KEYCLOAK_DB_DATABSE}
+      - KEYCLOAK_DATABASE_USER=${KEYCLOAK_DB_USER}
+      - KEYCLOAK_DATABASE_PASSWORD=${KEYCLOAK_DB_PASS}
+    ports:
+      - ${KEYCLOAK_EXPOSE_PORT}:${KEYCLOAK_SERVER_PORT}
+    depends_on:
+      - postgres_db
+    networks: ['app-network']
+
+networks: {app-network: {}}
+
